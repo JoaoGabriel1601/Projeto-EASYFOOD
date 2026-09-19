@@ -1,5 +1,8 @@
 # EasyFood
 
+**Aluno:** João Gabriel Felix Fernandes  
+**RA:** 95536
+
 API das Missões 1 a 4 e da Atividade 5, em Node.js/Express, PostgreSQL, Prisma e JWT. A aplicação pedida nos documentos é uma API; use um cliente HTTP como Postman, os exemplos abaixo ou a suíte de testes.
 
 ## Executar no Windows
