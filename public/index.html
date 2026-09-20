@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1a1a1a">
+  <meta name="theme-color" content="#c64a2b">
   <title>EasyFood — Restaurantes</title>
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
@@ -11,9 +11,18 @@
 <body>
   <main class="phone">
     <header class="header">
-      <h1 class="header-logo"><span aria-hidden="true">🍴</span> EasyFood</h1>
+      <h1 class="header-logo"><span class="brand-mark" aria-hidden="true">🍴</span> EasyFood<span class="brand-dot" aria-hidden="true">.</span></h1>
       <button class="header-account" id="account-button" type="button">Entrar</button>
     </header>
+
+    <section class="welcome" aria-labelledby="welcome-title" data-catalog>
+      <div class="welcome-copy">
+        <p class="eyebrow">BOA COMIDA, BOAS ESCOLHAS</p>
+        <h2 id="welcome-title">Seu próximo favorito<br>começa aqui<span>.</span></h2>
+        <p>Explore sabores e encontre um restaurante com a sua cara.</p>
+      </div>
+      <div class="welcome-art" aria-hidden="true"><span class="art-spark">✦</span><span class="art-plate">🍝</span><span class="art-leaf">✦</span></div>
+    </section>
 
     <div class="search-bar" data-catalog>
       <span aria-hidden="true">🔍</span>
