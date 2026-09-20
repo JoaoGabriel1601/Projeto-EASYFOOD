@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a1a1a">
+  <title>EasyFood — Restaurantes</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="phone">
+    <header class="header">
+      <h1 class="header-logo"><span aria-hidden="true">🍴</span> EasyFood</h1>
+      <button class="header-account" id="account-button" type="button">Entrar</button>
+    </header>
+
+    <div class="search-bar" data-catalog>
+      <span aria-hidden="true">🔍</span>
+      <input id="search" type="search" placeholder="Buscar restaurantes" aria-label="Buscar restaurantes">
+    </div>
+    <div class="categories" id="categories" aria-label="Filtrar por categoria" data-catalog></div>
+    <div class="section-header" data-catalog>
+      <h2 id="list-title">Restaurantes</h2>
+      <select class="order-btn" id="sort" aria-label="Ordenar restaurantes">
+        <option value="name">Nome: A–Z</option>
+        <option value="rating">Melhor avaliação</option>
+        <option value="recent">Mais recentes</option>
+      </select>
+    </div>
+    <section class="restaurant-list" id="restaurant-list" aria-label="Lista de restaurantes" aria-live="polite" data-catalog>
+      <div class="loading"><div class="spinner" aria-hidden="true"></div><p>Carregando restaurantes...</p></div>
+    </section>
+
+    <section class="panel" id="add-panel" aria-labelledby="add-title" hidden>
+      <h2 id="add-title" tabindex="-1">Cadastrar restaurante</h2>
+      <p id="add-hint">Entre na sua conta para cadastrar um restaurante.</p>
+      <button class="submit-btn" id="add-login" type="button">Entrar para cadastrar</button>
+      <form id="restaurant-form" hidden>
+        <div class="form-group"><label for="restaurant-name">Nome do restaurante</label><input id="restaurant-name" name="name" maxlength="150" placeholder="Ex: Taco Loco" required></div>
+        <div class="form-group"><label for="restaurant-category">Categoria</label><input id="restaurant-category" name="category" list="category-options" maxlength="100" placeholder="Ex: Mexicana" required><datalist id="category-options"><option value="Burger"><option value="Pizza"><option value="Sushi"><option value="Saudável"><option value="Mexicana"><option value="Brasileira"><option value="Japonesa"><option value="Italiana"></datalist></div>
+        <div class="form-group"><label for="restaurant-rating">Avaliação (0 a 5)</label><input id="restaurant-rating" name="rating" type="number" min="0" max="5" step="0.1" placeholder="Ex: 4.3" required></div>
+        <button class="submit-btn" type="submit">Cadastrar restaurante</button>
+      </form>
+      <p class="form-message" id="restaurant-message" role="status"></p>
+    </section>
+
+    <section class="panel" id="profile-panel" aria-labelledby="profile-title" hidden>
+      <h2 id="profile-title" tabindex="-1">Sua conta</h2>
+      <div id="signed-in" hidden>
+        <p id="profile-name"></p><p id="profile-email"></p>
+        <button class="submit-btn" id="profile-add" type="button">Cadastrar restaurante</button>
+        <button class="secondary-btn" id="logout" type="button">Sair da conta</button>
+      </div>
+      <div id="signed-out">
+        <p id="auth-intro">Entre para cadastrar restaurantes na EasyFood.</p>
+        <form id="auth-form">
+          <div class="form-group" id="name-group" hidden><label for="auth-name">Nome completo</label><input id="auth-name" name="name" autocomplete="name" maxlength="150"></div>
+          <div class="form-group"><label for="auth-email">E-mail</label><input id="auth-email" name="email" type="email" autocomplete="username" maxlength="150" required></div>
+          <div class="form-group"><label for="auth-password">Senha</label><input id="auth-password" name="password" type="password" autocomplete="current-password" required></div>
+          <button class="submit-btn" id="auth-submit" type="submit">Entrar</button>
+        </form>
+        <button class="secondary-btn" id="auth-toggle" type="button">Criar uma conta</button>
+      </div>
+      <p class="form-message" id="auth-message" role="status"></p>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Navegação principal">
+      <button class="nav-item active" data-view="home" aria-current="page" type="button"><span class="icon" aria-hidden="true">🏠</span>Início</button>
+      <button class="nav-item" data-view="search" type="button"><span class="icon" aria-hidden="true">🔍</span>Buscar</button>
+      <button class="nav-item" data-view="add" type="button"><span class="icon" aria-hidden="true">➕</span>Cadastrar</button>
+      <button class="nav-item" data-view="favorites" type="button"><span class="icon" aria-hidden="true">❤️</span>Favoritos</button>
+      <button class="nav-item" data-view="profile" type="button"><span class="icon" aria-hidden="true">👤</span>Perfil</button>
+    </nav>
+  </main>
+  <noscript>Ative o JavaScript para consultar e cadastrar restaurantes.</noscript>
+</body>
+</html>

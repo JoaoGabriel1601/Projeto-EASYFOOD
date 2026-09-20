@@ -37,6 +37,18 @@ npm.cmd start
 npm.cmd run db:studio
 ```
 
+## Integração da interface HTML
+
+- Material recebido integrado em `public/index.html`, `public/styles.css` e `public/app.js`, servido pelo Express na raiz `/`.
+- Preservado o visual móvel; cadastro de restaurantes adaptado ao JWT exigido na Atividade 5.
+- `npm.cmd test`: os 17 testes existentes passaram após a integração; JavaScript do frontend validado com `node --check`.
+- HTML, CSS e JavaScript retornaram status 200 com tipos de conteúdo apropriados.
+- Verificados no navegador: listagem pública, busca por nome, filtro por categoria, ordenação por avaliação, paginação, adicionar/remover favoritos, cadastro de usuário, login, cadastro autenticado de restaurante e saída da conta.
+- Confirmada a exibição literal de marcação HTML no nome de um restaurante, sem interpretá-la como elementos da página.
+- Conta e restaurante temporários usados na verificação foram removidos ao terminar; os dados iniciais foram preservados.
+- Sessão mantida apenas em memória e favoritos locais ao navegador, conforme documentado no README.
+- Revisão visual do layout realizada no navegador. Carrinho e valores fictícios de entrega do protótipo foram removidos por não terem correspondência na API.
+
 ## Dependências
 
 A atualização compatível de qs foi aplicada com npm audit fix. Permanecem três alertas de gravidade alta na cadeia de ferramentas Prisma -> @prisma/config -> deepmerge-ts (uma vulnerabilidade transitiva, GHSA-ggr8-5vv4-36mx). O npm propõe uma alteração incompatível para prisma 6.12.0; ela não foi aplicada automaticamente. Esse alerta permanece como limitação da versão da base. Não foi declarado que a auditoria está sem vulnerabilidades.

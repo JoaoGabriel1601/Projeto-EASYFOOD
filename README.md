@@ -3,7 +3,7 @@
 **Aluno:** João Gabriel Felix Fernandes  
 **RA:** 95536
 
-API das Missões 1 a 4 e da Atividade 5, em Node.js/Express, PostgreSQL, Prisma e JWT. A aplicação pedida nos documentos é uma API; use um cliente HTTP como Postman, os exemplos abaixo ou a suíte de testes.
+Projeto das Missões 1 a 4 e da Atividade 5, em Node.js/Express, PostgreSQL, Prisma e JWT, com interface web integrada a partir do HTML recebido. A API também pode ser usada pelo Postman, pelos exemplos abaixo ou pela suíte de testes.
 
 ## Executar no Windows
 
@@ -26,7 +26,19 @@ npm.cmd run db:seed
 npm.cmd start
 ```
 
-O servidor usa a porta 3000, configurável por `PORT`. Abra http://localhost:3000/restaurants para consultar o JSON. Encerre com Ctrl+C. `npm.cmd run dev` reinicia a aplicação quando o código muda.
+O servidor usa a porta 3000, configurável por `PORT`. Abra http://localhost:3000 para usar a interface ou http://localhost:3000/restaurants para consultar o JSON. Encerre com Ctrl+C. `npm.cmd run dev` reinicia a aplicação quando o código muda.
+
+## Interface web
+
+O HTML recebido foi integrado em `public/index.html`, com estilos em `public/styles.css` e comportamento em `public/app.js`. O Express entrega a interface e a API na mesma origem; não é necessário outro servidor nem abrir o HTML diretamente pelo sistema de arquivos.
+
+- Consulte os restaurantes sem login, busque por nome/categoria, filtre por categorias existentes e ordene por nome, avaliação ou cadastro mais recente.
+- A lista mostra três resultados por vez; use **Carregar mais** para ver os seguintes.
+- Marque o coração para salvar favoritos neste navegador. Favoritos são locais e não ficam vinculados a uma conta.
+- Em **Perfil**, use **Criar uma conta** e depois **Entrar**. Em **Cadastrar**, envie o restaurante com a sessão autenticada; o frontend inclui o JWT exigido pela API.
+- Use **Sair da conta** para descartar a sessão local. O token é mantido apenas em memória: recarregar a página exige novo login. O backend mantém a política de expiração descrita no ADR-004.
+
+O layout móvel do material original foi preservado e adaptado a telas menores. Preços/prazos de entrega fictícios e o contador de carrinho foram removidos, pois não existem esses dados ou funcionalidades na API. Nomes e categorias são renderizados como texto para evitar executar HTML enviado por usuários. Mensagens de erro da API aparecem nos formulários.
 
 Os scripts Prisma chamam o CLI diretamente pelo Node para funcionar no caminho local, que contém espaços e `&`. A base recebida tinha um cliente Prisma para macOS; `db:generate` gera os binários da máquina atual. Migrations são incrementais; não é necessário executar reset nem apagar tabelas.
 
@@ -84,6 +96,7 @@ src/config/auth.js                Configuração JWT
 src/database/prisma.js            Conexão única com Prisma
 src/modules/restaurants/          Routes, controller e service
 src/modules/auth/                 Routes, controller, service e middleware
+public/                           Interface HTML, CSS e JavaScript
 prisma/schema.prisma              Restaurant e User
 prisma/migrations/                Histórico incremental do banco
 prisma/seed.js                    Restaurantes iniciais sem duplicar em reexecução sequencial
