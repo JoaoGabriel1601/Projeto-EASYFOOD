@@ -7,6 +7,7 @@ node_modules/
 
 # Arquivos gerados e temporários
 /generated/prisma/
+/uploads/
 coverage/
 *.log
 tmp/

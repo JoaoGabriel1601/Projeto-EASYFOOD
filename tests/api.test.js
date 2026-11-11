@@ -15,7 +15,7 @@ const createdRestaurants = [];
 
 async function startServer() {
   child = spawn(process.execPath, ["server.js"], {
-    cwd: path.join(__dirname, ".."), env: { ...process.env, PORT: "0" },
+    cwd: path.join(__dirname, ".."), env: { ...process.env, PORT: "0", EMAIL_TEST_TO: "" },
     stdio: ["ignore", "pipe", "pipe"]
   });
   await new Promise((resolve, reject) => {

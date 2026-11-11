@@ -3,7 +3,7 @@
 **Aluno:** João Gabriel Felix Fernandes  
 **RA:** 95536
 
-Projeto das Missões 1 a 4 e da Atividade 5, em Node.js/Express, PostgreSQL, Prisma e JWT, com interface web integrada a partir do HTML recebido. A API também pode ser usada pelo Postman, pelos exemplos abaixo ou pela suíte de testes.
+Projeto das Missões 1 a 4 e das Atividades 5 a 7, em Node.js/Express, PostgreSQL, Prisma e JWT, com interface web integrada a partir do HTML recebido. A API também pode ser usada pelo Postman, pelos exemplos abaixo ou pela suíte de testes.
 
 ## Executar no Windows
 
@@ -51,6 +51,10 @@ Os scripts Prisma chamam o CLI diretamente pelo Node para funcionar no caminho l
 | POST | /auth/login | Pública | 200, token e usuário sem senha |
 | GET | /auth/me | Bearer JWT | 200, identidade do token |
 | POST | /restaurants | Bearer JWT | 201, restaurante criado |
+| GET | /restaurants/:restaurantId/dishes | Pública | 200, cardápio do restaurante |
+| POST | /restaurants/:restaurantId/dishes | Bearer JWT | 201, prato criado |
+| POST | /dishes/:dishId/image | Bearer JWT | 200, prato com a imagem atualizada |
+| GET | /uploads/dishes/:filename | Pública | 200, imagem otimizada |
 
 Erros: 400 para entrada inválida, 401 para credenciais/token inválidos, 409 para e-mail já cadastrado, 500 para falha interna. A avaliação é um número entre 0 e 5; omitida ou nula assume zero. O Prisma serializa o Decimal do banco como string JSON. E-mails são normalizados para minúsculas. Senhas não são truncadas: entradas acima de 72 bytes são rejeitadas.
 
@@ -75,6 +79,29 @@ Invoke-RestMethod -Uri "$base/restaurants"
 
 O cadastro do mesmo e-mail uma segunda vez retorna 409; nesse caso, siga para o login. O token vale por um dia. O exemplo de senha segue o enunciado acadêmico.
 
+## Atividade 6 · E-mail após cadastro
+
+No [MailerSend](https://www.mailersend.com/help/how-to-start-sending-emails), verifique um remetente ou domínio e gere uma chave com permissão de envio. Preencha `EMAIL_API_KEY`, `EMAIL_FROM` e `EMAIL_TEST_TO` no `.env` local. `EMAIL_FROM_NAME` é opcional. Use em `EMAIL_TEST_TO` uma caixa autorizada a receber as duas mensagens de teste.
+
+Reinicie o servidor e cadastre um restaurante com o JWT. Depois do cadastro no PostgreSQL, o serviço compartilhado envia as mensagens de boas-vindas e de aviso comercial ao destinatário configurado. O terminal registra a aceitação ou falha de cada envio. Confira a caixa de entrada para confirmar a entrega. Deixe `EMAIL_TEST_TO` vazio para desativar os envios, por exemplo, durante testes locais.
+
+## Atividade 7 · Cardápio e imagem
+
+Após instalar as dependências, rode `npm.cmd run db:generate` e `npm.cmd run db:migrate` com o servidor parado. A migração adiciona a tabela `Dish` e sua relação com `Restaurant`. Use o JWT do exemplo anterior e um identificador de restaurante que exista no banco.
+
+```powershell
+$restaurantId = 1
+$menu = "$base/restaurants/$restaurantId/dishes"
+$body = @{ name = 'Pizza Margherita'; description = 'Tomate, queijo e manjericão'; price = '49.90' } | ConvertTo-Json
+$dish = Invoke-RestMethod -Method Post -Uri $menu -Headers $headers -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Uri $menu
+curl.exe -H "Authorization: Bearer $($login.token)" -F "image=@foto.png" "$base/dishes/$($dish.id)/image"
+```
+
+Troque `foto.png` pelo caminho da imagem. Abra `imageUrl` no navegador usando o mesmo host. O upload aceita JPEG, PNG ou WebP de até 5 MB. A API retorna 400 para arquivo ausente ou inválido e 413 acima do limite. O prato continua no banco e aceita nova tentativa. O Sharp gera WebP com até 800 px de largura e o Express serve a versão otimizada. As rotas do cardápio seguem o escopo da atividade e podem ser usadas diretamente pelo Postman ou PowerShell.
+
+A decisão de processar imagens no servidor está no [ADR-005](docs/adr/ADR-005-processamento-de-imagens.md).
+
 ## Verificação
 
 ```powershell
@@ -85,7 +112,7 @@ npm.cmd test
 npm.cmd run db:studio
 ```
 
-Testes unitários de HTTP/middleware não precisam de banco. Os testes de integração exigem as migrations aplicadas e usam PostgreSQL real: criam registros com identificadores exclusivos e removem somente seus próprios registros no encerramento. Eles iniciam a API em uma porta livre, encerram o processo e iniciam outro para verificar persistência. Não precisam que `npm start` esteja em execução. Prisma Studio fica em http://localhost:5555; abra Restaurant e User para consultar os registros.
+Testes unitários de HTTP/middleware e e-mail simulado não precisam de banco. Os testes de integração exigem as migrations aplicadas e usam PostgreSQL real. Criam registros com identificadores exclusivos e removem seus registros e arquivos ao terminar. A suíte inicia a API em portas livres e verifica persistência após reinicialização. Para executar com segurança sem chamar o provedor real, deixe `EMAIL_TEST_TO` vazio. Prisma Studio fica em http://localhost:5555 e permite consultar Restaurant, User e Dish.
 
 ## Organização e entregas
 
@@ -96,8 +123,10 @@ src/config/auth.js                Configuração JWT
 src/database/prisma.js            Conexão única com Prisma
 src/modules/restaurants/          Routes, controller e service
 src/modules/auth/                 Routes, controller, service e middleware
+src/modules/dishes/               Cardápio e upload de fotos
+src/modules/shared/               E-mail, processamento e middleware de upload
 public/                           Interface HTML, CSS e JavaScript
-prisma/schema.prisma              Restaurant e User
+prisma/schema.prisma              Restaurant, User e Dish
 prisma/migrations/                Histórico incremental do banco
 prisma/seed.js                    Restaurantes iniciais sem duplicar em reexecução sequencial
 tests/                            Testes sem banco e integração real

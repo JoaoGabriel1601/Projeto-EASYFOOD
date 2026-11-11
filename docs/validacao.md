@@ -52,3 +52,20 @@ npm.cmd run db:studio
 ## Dependências
 
 A atualização compatível de qs foi aplicada com npm audit fix. Permanecem três alertas de gravidade alta na cadeia de ferramentas Prisma -> @prisma/config -> deepmerge-ts (uma vulnerabilidade transitiva, GHSA-ggr8-5vv4-36mx). O npm propõe uma alteração incompatível para prisma 6.12.0; ela não foi aplicada automaticamente. Esse alerta permanece como limitação da versão da base. Não foi declarado que a auditoria está sem vulnerabilidades.
+
+## Atividades 6 e 7 · 11/11/2026
+
+- A migração `20261111000100_add_dishes` foi aplicada ao PostgreSQL local. O cliente Prisma foi regenerado.
+- `npm.cmd test` passou com 19 testes. A integração confirmou cadastro e consulta de pratos, proteção por JWT, upload e substituição de imagem, persistência de `imageUrl` e resposta pública com `Content-Type: image/webp`.
+- Arquivo ausente, tipo inválido e conteúdo não decodificável retornaram 400. Um envio maior que 5 MB retornou 413. O prato permaneceu disponível após essas falhas.
+- Um WebP de teste gerado pelo mesmo serviço abriu no navegador com 800 × 500 px. O arquivo temporário foi removido após a conferência.
+- A resposta simulada 503 do MailerSend para as duas mensagens preservou o status 201 e o restaurante no PostgreSQL. A entrega em caixa real depende da configuração do MailerSend no `.env`.
+
+### Comparação da imagem
+
+| Versão | Formato | Dimensões | Tamanho |
+| --- | --- | --- | --- |
+| Original | PNG sintético de cor uniforme, sem compressão | 1.600 × 1.000 px | 4.808.831 bytes |
+| Otimizada | WebP, qualidade 80 | 800 × 500 px | 816 bytes |
+
+A versão otimizada ficou menor. O Sharp reduziu largura e altura pela metade e converteu o PNG em WebP. A economia de bytes pode reduzir o tempo de carregamento e o consumo de dados. O ganho depende do conteúdo, do formato de origem e da compressão já aplicada. Um arquivo pequeno já comprimido pode até aumentar de tamanho.
