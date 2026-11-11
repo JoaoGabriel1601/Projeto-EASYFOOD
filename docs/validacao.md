@@ -59,7 +59,8 @@ A atualização compatível de qs foi aplicada com npm audit fix. Permanecem tr�
 - `npm.cmd test` passou com 19 testes. A integração confirmou cadastro e consulta de pratos, proteção por JWT, upload e substituição de imagem, persistência de `imageUrl` e resposta pública com `Content-Type: image/webp`.
 - Arquivo ausente, tipo inválido e conteúdo não decodificável retornaram 400. Um envio maior que 5 MB retornou 413. O prato permaneceu disponível após essas falhas.
 - Um WebP de teste gerado pelo mesmo serviço abriu no navegador com 800 × 500 px. O arquivo temporário foi removido após a conferência.
-- A resposta simulada 503 do MailerSend para as duas mensagens preservou o status 201 e o restaurante no PostgreSQL. A entrega em caixa real depende da configuração do MailerSend no `.env`.
+- A resposta simulada 503 do MailerSend para as duas mensagens preservou o status 201 e o restaurante no PostgreSQL.
+- Após configurar o MailerSend no ambiente local, um cadastro de teste retornou 201. O MailerSend registrou as duas mensagens como entregues, e ambas foram encontradas na caixa de entrada do Gmail. O restaurante temporário foi removido do banco após o teste.
 
 ### Comparação da imagem
 
