@@ -26,7 +26,22 @@ async function login(req, res, next) {
     res.json(result);
   } catch (error) { next(error); }
 }
-function me(req, res) {
-  res.json({ message: "Você está autenticado!", user: req.user });
+async function me(req, res, next) {
+  try {
+    const user = await service.getProfile(req.user.id);
+    return res.json({ message: "Você está autenticado!", user });
+  } catch (error) {
+    return next(error);
+  }
 }
-module.exports = { register, login, me };
+
+async function uploadImage(req, res, next) {
+  if (!req.file) return res.status(400).json({ error: "Nenhuma imagem enviada" });
+  try {
+    return res.json(await service.uploadProfileImage(req.user.id, req.file.buffer));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { register, login, me, uploadImage };

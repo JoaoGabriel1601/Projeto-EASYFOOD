@@ -18,7 +18,7 @@ async function create(req, res, next) {
     return res.status(400).json({ error: "Preço inválido. Use até oito dígitos inteiros e duas casas decimais." });
   }
   try {
-    const dish = await dishService.createDish(restaurantId, { name: name.trim(), description: description.trim(), price });
+    const dish = await dishService.createDish(restaurantId, { name: name.trim(), description: description.trim(), price }, req.user.id);
     return res.status(201).json(dish);
   } catch (error) {
     return next(error);
@@ -40,7 +40,7 @@ async function uploadImage(req, res, next) {
   if (!dishId) return res.status(400).json({ error: "Identificador de prato inválido" });
   if (!req.file) return res.status(400).json({ error: "Nenhuma imagem enviada" });
   try {
-    return res.json(await dishService.uploadDishImage(dishId, req.file.buffer));
+    return res.json(await dishService.uploadDishImage(dishId, req.file.buffer, req.user.id));
   } catch (error) {
     return next(error);
   }

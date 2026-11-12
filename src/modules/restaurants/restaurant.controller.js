@@ -14,7 +14,7 @@ async function create(req, res, next) {
     return res.status(400).json({ error: "Avaliação deve ser um número entre 0 e 5" });
   }
   try {
-    const restaurant = await service.createRestaurant({ name: name.trim(), category: category.trim(), rating });
+    const restaurant = await service.createRestaurant({ name: name.trim(), category: category.trim(), rating }, req.user.id);
     res.status(201).json(restaurant);
   } catch (error) { next(error); }
 }

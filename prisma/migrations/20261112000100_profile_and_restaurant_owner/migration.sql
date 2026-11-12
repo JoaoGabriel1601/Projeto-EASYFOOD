@@ -1,0 +1,4 @@
+ALTER TABLE "User" ADD COLUMN "imageUrl" TEXT;
+ALTER TABLE "Restaurant" ADD COLUMN "ownerId" INTEGER;
+ALTER TABLE "Restaurant" ADD CONSTRAINT "Restaurant_ownerId_fkey"
+    FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

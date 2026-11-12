@@ -3,7 +3,7 @@
 **Aluno:** João Gabriel Felix Fernandes  
 **RA:** 95536
 
-Projeto das Missões 1 a 4 e das Atividades 5 a 7, em Node.js/Express, PostgreSQL, Prisma e JWT, com interface web integrada a partir do HTML recebido. A API também pode ser usada pelo Postman, pelos exemplos abaixo ou pela suíte de testes.
+Projeto das Missões 1 a 4 e das Atividades 5 a 8, em Node.js/Express, PostgreSQL, Prisma e JWT, com interface web integrada a partir do HTML recebido. A API também pode ser usada pelo Postman, pelos exemplos abaixo ou pela suíte de testes.
 
 ## Executar no Windows
 
@@ -49,12 +49,14 @@ Os scripts Prisma chamam o CLI diretamente pelo Node para funcionar no caminho l
 | GET | /restaurants | Pública | 200, lista de restaurantes |
 | POST | /auth/register | Pública | 201, usuário sem senha |
 | POST | /auth/login | Pública | 200, token e usuário sem senha |
-| GET | /auth/me | Bearer JWT | 200, identidade do token |
+| GET | /auth/me | Bearer JWT | 200, identidade e URL da foto de perfil |
+| POST | /auth/me/image | Bearer JWT | 200, perfil com a imagem atualizada |
 | POST | /restaurants | Bearer JWT | 201, restaurante criado |
 | GET | /restaurants/:restaurantId/dishes | Pública | 200, cardápio do restaurante |
 | POST | /restaurants/:restaurantId/dishes | Bearer JWT | 201, prato criado |
 | POST | /dishes/:dishId/image | Bearer JWT | 200, prato com a imagem atualizada |
 | GET | /uploads/dishes/:filename | Pública | 200, imagem otimizada |
+| GET | /uploads/profiles/:filename | Pública | 200, foto de perfil otimizada |
 
 Erros: 400 para entrada inválida, 401 para credenciais/token inválidos, 409 para e-mail já cadastrado, 500 para falha interna. A avaliação é um número entre 0 e 5; omitida ou nula assume zero. O Prisma serializa o Decimal do banco como string JSON. E-mails são normalizados para minúsculas. Senhas não são truncadas: entradas acima de 72 bytes são rejeitadas.
 
@@ -101,6 +103,19 @@ curl.exe -H "Authorization: Bearer $($login.token)" -F "image=@foto.png" "$base/
 Troque `foto.png` pelo caminho da imagem. Abra `imageUrl` no navegador usando o mesmo host. O upload aceita JPEG, PNG ou WebP de até 5 MB. A API retorna 400 para arquivo ausente ou inválido e 413 acima do limite. O prato continua no banco e aceita nova tentativa. O Sharp gera WebP com até 800 px de largura e o Express serve a versão otimizada. As rotas do cardápio seguem o escopo da atividade e podem ser usadas diretamente pelo Postman ou PowerShell.
 
 A decisão de processar imagens no servidor está no [ADR-005](docs/adr/ADR-005-processamento-de-imagens.md).
+
+## Atividade 8 · Cadastro de pratos e foto de perfil
+
+Os restaurantes novos ficam vinculados à conta que os cadastrou. Nesses restaurantes, só o dono pode cadastrar pratos ou trocar suas imagens. Restaurantes antigos e do seed que ainda estão sem dono aceitam alterações por usuários autenticados, como na atividade anterior. O prato pode ser criado sem foto e o cardápio retorna `imageUrl` depois do upload.
+
+Para enviar uma foto de perfil, use o JWT de login e o mesmo campo multipart `image` usado para pratos:
+
+```powershell
+curl.exe -H "Authorization: Bearer $($login.token)" -F "image=@perfil.png" "$base/auth/me/image"
+Invoke-RestMethod -Uri "$base/auth/me" -Headers $headers
+```
+
+O JWT determina qual perfil recebe a imagem. A resposta inclui a URL pública do WebP. A análise da correção do professor está no [registro de validação](docs/validacao.md).
 
 ## Verificação
 

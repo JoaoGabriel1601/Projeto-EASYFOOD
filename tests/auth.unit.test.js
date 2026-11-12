@@ -14,11 +14,15 @@ before(async () => {
 });
 after(() => new Promise(resolve => server.close(resolve)));
 
-test("middleware aceita JWT válido e retorna apenas identidade", async () => {
+test("middleware encaminha a identidade do JWT ao perfil", async (t) => {
+  const service = require("../src/modules/auth/auth.service");
+  const profile = { id: 42, email: "aluno@example.com", imageUrl: null };
+  const getProfile = t.mock.method(service, "getProfile", async () => profile);
   const token = jwt.sign({ sub: "42", email: "aluno@example.com" }, process.env.JWT_SECRET, { expiresIn: "1d" });
   const res = await fetch(base + "/auth/me", { headers: { Authorization: `Bearer ${token}` } });
   assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), { message: "Você está autenticado!", user: { id: 42, email: "aluno@example.com" } });
+  assert.deepEqual(await res.json(), { message: "Você está autenticado!", user: profile });
+  assert.deepEqual(getProfile.mock.calls[0].arguments, [42]);
 });
 test("middleware bloqueia tokens ausentes, adulterados, expirados e payloads inválidos", async () => {
   const payload = { sub: "42", email: "aluno@example.com" };

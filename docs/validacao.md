@@ -70,3 +70,13 @@ A atualização compatível de qs foi aplicada com npm audit fix. Permanecem tr�
 | Otimizada | WebP, qualidade 80 | 800 × 500 px | 816 bytes |
 
 A versão otimizada ficou menor. O Sharp reduziu largura e altura pela metade e converteu o PNG em WebP. A economia de bytes pode reduzir o tempo de carregamento e o consumo de dados. O ganho depende do conteúdo, do formato de origem e da compressão já aplicada. Um arquivo pequeno já comprimido pode até aumentar de tamanho.
+
+## Atividade 8 · Cadastro de pratos e fotos
+
+No [commit de referência 70e459e](https://github.com/FelipeDiasR/easy-food/commit/70e459efbdc880815f131ebe3e4c92e39efb6270), o serviço exigia `imageUrl` no cadastro do prato. Como a imagem é enviada depois, a validação rejeitava o cadastro sem foto. O professor removeu essa exigência do corpo e passou a gravar uma string vazia para atender ao schema obrigatório. O mesmo commit passou a gravar `ownerId` na criação de restaurantes e a encaminhar o ID do JWT do controller de pratos ao serviço para conferir a propriedade.
+
+A referência alterou `dish.controller.js`, `dish.service.js`, `restaurant.controller.js`, `restaurant.service.js`, o schema Prisma e a migração de propriedade. Nesta versão, `Dish.imageUrl` já era opcional. O cadastro mantém `null` até o upload. A migração adiciona a relação de propriedade com `ownerId` opcional, pois o PostgreSQL local já contém restaurantes sem usuário associado. Restaurantes novos exigem que o dono autenticado gerencie seus pratos. Os registros legados preservam o acesso de usuários autenticados.
+
+As rotas aplicam JWT antes de Multer. Os controllers validam a requisição e traduzem o resultado para HTTP. Os serviços de autenticação e pratos consultam o PostgreSQL e delegam a otimização e a troca dos arquivos ao mesmo serviço. Assim, os formatos e a qualidade são mantidos em um único lugar, e uma nova categoria de imagem pode seguir a mesma integração. O upload de perfil usa a identidade do JWT. Se o arquivo for inválido ou a atualização falhar, o registro e sua foto anterior permanecem disponíveis para nova tentativa.
+
+A migração `20261112000100_profile_and_restaurant_owner` foi aplicada ao PostgreSQL local. Os 19 testes passaram. A suíte confirmou o cadastro de prato sem foto, a resposta 403 para outra conta, o vínculo da foto de perfil à identidade do JWT, os caminhos retornados pelo perfil e pelo cardápio e o acesso público aos dois arquivos WebP. Também confirmou os retornos 400 para imagem inválida, 401 sem JWT e 404 para prato inexistente.

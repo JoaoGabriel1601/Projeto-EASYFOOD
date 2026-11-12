@@ -4,11 +4,10 @@ const fs = require("node:fs/promises");
 const { randomUUID } = require("node:crypto");
 
 const uploadsDirectory = path.resolve(__dirname, "../../../uploads");
-const dishDirectory = path.join(uploadsDirectory, "dishes");
 const allowedFormats = new Set(["jpeg", "png", "webp"]);
-const imagePrefix = "/uploads/dishes/";
 
-async function optimizeImage(buffer) {
+async function optimizeImage(buffer, folder) {
+  if (!["dishes", "profiles"].includes(folder)) throw new Error("Pasta de imagem inválida");
   let optimized;
   try {
     const image = sharp(buffer, { limitInputPixels: 25_000_000, failOn: "warning" });
@@ -20,26 +19,43 @@ async function optimizeImage(buffer) {
     throw Object.assign(new Error("Imagem inválida. Envie JPEG, PNG ou WebP com até 25 megapixels."), { statusCode: 400 });
   }
   const filename = `${randomUUID()}.webp`;
-  await fs.mkdir(dishDirectory, { recursive: true });
-  const filepath = path.join(dishDirectory, filename);
+  const imageUrl = `/uploads/${folder}/${filename}`;
+  const directory = path.join(uploadsDirectory, folder);
+  await fs.mkdir(directory, { recursive: true });
+  const filepath = path.join(directory, filename);
   try {
     await fs.writeFile(filepath, optimized, { flag: "wx" });
   } catch (error) {
-    if (error.code !== "EEXIST") await removeImage(imagePrefix + filename);
+    if (error.code !== "EEXIST") await removeImage(imageUrl);
     throw error;
   }
-  return imagePrefix + filename;
+  return imageUrl;
 }
 
 async function removeImage(imageUrl) {
-  if (!imageUrl?.startsWith(imagePrefix)) return;
-  const filename = imageUrl.slice(imagePrefix.length);
-  if (!/^[0-9a-f-]{36}\.webp$/.test(filename)) return;
+  const match = /^\/uploads\/(dishes|profiles)\/([0-9a-f-]{36}\.webp)$/.exec(imageUrl);
+  if (!match) return;
   try {
-    await fs.rm(path.join(dishDirectory, filename), { force: true });
+    await fs.rm(path.join(uploadsDirectory, match[1], match[2]), { force: true });
   } catch (error) {
     console.error("[IMAGEM] Falha ao remover arquivo:", error.code);
   }
 }
 
-module.exports = { optimizeImage, removeImage, uploadsDirectory };
+async function replaceImage(folder, buffer, previousUrl, save) {
+  const imageUrl = await optimizeImage(buffer, folder);
+  let updated;
+  try {
+    updated = await save(imageUrl);
+  } catch (error) {
+    await removeImage(imageUrl);
+    if (error.code === "P2025") {
+      throw Object.assign(new Error("O registro foi alterado durante o upload. Tente novamente."), { statusCode: 409 });
+    }
+    throw error;
+  }
+  await removeImage(previousUrl);
+  return updated;
+}
+
+module.exports = { replaceImage, removeImage, uploadsDirectory };

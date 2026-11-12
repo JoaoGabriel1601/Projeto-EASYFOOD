@@ -20,6 +20,8 @@ test("cardápio, upload e falha de e-mail pela API com PostgreSQL", async (t) =>
   });
   const headers = { Authorization: `Bearer ${token}` };
   const name = `Teste cardápio ${randomUUID()}`;
+  const email = `${randomUUID()}@example.test`;
+  let user;
   let restaurant;
   const images = [];
   t.after(async () => {
@@ -30,6 +32,7 @@ test("cardápio, upload e falha de e-mail pela API com PostgreSQL", async (t) =>
         await prisma.restaurant.delete({ where: { id: restaurant.id } });
       }
       for (const image of images) await removeImage(image);
+      if (user) await prisma.user.delete({ where: { id: user.id } });
     } finally {
       await prisma.$disconnect();
     }
@@ -58,9 +61,18 @@ test("cardápio, upload e falha de e-mail pela API com PostgreSQL", async (t) =>
     headers: { ...authorization, "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+  const credentials = { email, password: "teste123" };
+  const registration = await postJson("/auth/register", { ...credentials, name: "Teste" }, {});
+  assert.equal(registration.status, 201);
+  user = await registration.json();
+  const login = await postJson("/auth/login", credentials, {});
+  assert.equal(login.status, 200);
+  const stranger = { ...headers };
+  headers.Authorization = `Bearer ${(await login.json()).token}`;
   const created = await postJson("/restaurants", { name, category: "Italiana" });
   assert.equal(created.status, 201);
   restaurant = await created.json();
+  assert.equal(restaurant.ownerId, user.id);
   assert.equal(emails.length, 2);
   const catalog = await (await fetch(base + "/restaurants")).json();
   assert.ok(catalog.some(({ id }) => id === restaurant.id));
@@ -68,6 +80,7 @@ test("cardápio, upload e falha de e-mail pela API com PostgreSQL", async (t) =>
   const menu = `/restaurants/${restaurant.id}/dishes`;
   const input = { name: "Pizza Margherita", description: "Tomate, queijo e manjericão", price: "49.90" };
   assert.equal((await postJson(menu, input, {})).status, 401);
+  assert.equal((await postJson(menu, input, stranger)).status, 403);
   assert.equal((await postJson(menu, { ...input, price: "49.999" })).status, 400);
   assert.equal((await postJson("/restaurants/2147483647/dishes", input)).status, 404);
   const createdDish = await postJson(menu, input);
@@ -78,15 +91,32 @@ test("cardápio, upload e falha de e-mail pela API com PostgreSQL", async (t) =>
   assert.equal(dish.imageUrl, null);
 
   const imageRoute = base + `/dishes/${dish.id}/image`;
-  const upload = (file, authorization = headers) => {
+  const upload = (file, authorization = headers, url = imageRoute) => {
     const body = new FormData();
     if (file) body.set("image", file, "original.png");
-    return fetch(imageRoute, { method: "POST", headers: authorization, body });
+    return fetch(url, { method: "POST", headers: authorization, body });
   };
   const source = await sharp({
     create: { width: 1600, height: 1000, channels: 3, background: "#c64a2b" },
   }).png({ compressionLevel: 0 }).toBuffer();
   const png = new Blob([source], { type: "image/png" });
+  assert.equal((await upload(png, stranger)).status, 403);
+  assert.equal((await upload(png, headers, base + "/dishes/2147483647/image")).status, 404);
+  const profileRoute = base + "/auth/me/image";
+  assert.equal((await upload(png, {}, profileRoute)).status, 401);
+  assert.equal((await upload(new Blob(["texto"], { type: "image/png" }), headers, profileRoute)).status, 400);
+  const profileUpload = await upload(png, headers, profileRoute + "?userId=2147483647");
+  assert.equal(profileUpload.status, 200);
+  const profile = await profileUpload.json();
+  images.push(profile.imageUrl);
+  assert.equal(profile.id, user.id);
+  assert.match(profile.imageUrl, /^\/uploads\/profiles\/.*\.webp$/);
+  assert.deepEqual((await (await fetch(base + "/auth/me", { headers })).json()).user, profile);
+  const profileImage = await fetch(base + profile.imageUrl);
+  assert.equal(profileImage.status, 200);
+  assert.equal(profileImage.headers.get("content-type"), "image/webp");
+  const profileMetadata = await sharp(Buffer.from(await profileImage.arrayBuffer())).metadata();
+  assert.equal(profileMetadata.width, 800);
   assert.equal((await upload(png, {})).status, 401);
   assert.equal((await upload()).status, 400);
   assert.equal((await upload(new Blob(["texto"], { type: "text/plain" }))).status, 400);

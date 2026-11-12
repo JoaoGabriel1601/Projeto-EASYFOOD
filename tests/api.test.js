@@ -103,7 +103,7 @@ test("rotas protegidas rejeitam ausência, assinatura errada, expiração e cabe
 });
 test("GET /auth/me identifica o usuário com token válido", async () => {
   const r = await request("GET", "/auth/me", undefined, `Bearer ${token}`);
-  assert.equal(r.status, 200); assert.deepEqual(r.body.user, { id: user.id, email });
+  assert.equal(r.status, 200); assert.deepEqual(r.body.user, { id: user.id, email, imageUrl: null });
 });
 test("POST /restaurants autenticado valida campos e rating", async () => {
   for (const body of [undefined, {}, { name: " ", category: "Teste" }, { name: "A", category: "Teste", rating: 6 }, { name: "A", category: "Teste", rating: "4.3" }]) {

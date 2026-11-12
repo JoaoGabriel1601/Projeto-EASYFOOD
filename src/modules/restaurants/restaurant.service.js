@@ -3,8 +3,8 @@ const emailService = require("../shared/email.service");
 async function listRestaurants() {
   return prisma.restaurant.findMany({ orderBy: { id: "asc" } });
 }
-async function createRestaurant({ name, category, rating }) {
-  const restaurant = await prisma.restaurant.create({ data: { name, category, rating: rating ?? 0 } });
+async function createRestaurant({ name, category, rating }, ownerId) {
+  const restaurant = await prisma.restaurant.create({ data: { name, category, rating: rating ?? 0, ownerId } });
   const to = process.env.EMAIL_TEST_TO;
   if (!to) return restaurant;
 
